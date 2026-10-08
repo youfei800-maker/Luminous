@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Icon from "@/components/icon";
-export default function Footer() {
+export default function Footer({ site, hasDemo }) {
   return (
     <footer className="site-footer">
       <div className="footer-top page-width">
@@ -8,11 +8,7 @@ export default function Footer() {
           <Link href="/" className="footer-wordmark">
             LUMINOUS
           </Link>
-          <p className="footer-mission">
-            人生を通して、
-            <br />
-            輝き続ける女性で溢れた社会へ。
-          </p>
+          <p className="footer-mission editable-lines">{site.missionTitle}</p>
           <p className="footer-tagline">Future, in every light.</p>
         </div>
         <nav aria-label="フッターナビゲーション">
@@ -31,11 +27,18 @@ export default function Footer() {
           <Link href="/saved">
             あとで読む <Icon name="bookmark" size={15} />
           </Link>
+          <Link href="/editorial/login">
+            編集部ログイン <Icon name="diagonal" size={15} />
+          </Link>
         </nav>
       </div>
       <div className="footer-bottom page-width">
         <span>© 2026 Luminous</span>
-        <span>掲載プロフィール・記事本文はデモ用の架空のストーリーです。</span>
+        <span>
+          {hasDemo
+            ? "一部のプロフィール・記事はデモ用の架空のストーリーです。"
+            : "Future, in every light."}
+        </span>
         <a href="#main-content">BACK TO TOP ↑</a>
       </div>
     </footer>

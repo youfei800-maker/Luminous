@@ -1,15 +1,19 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { stories, themes, matchesCategory } from "@/lib/stories";
+import { themes as defaultThemes, matchesCategory } from "@/lib/stories";
 import StoryCard from "@/components/story-card";
 import Icon from "@/components/icon";
 import { useSavedStories } from "@/components/saved-provider";
 export default function StoryGrid({
+  stories,
   initialCategory = "all",
   savedOnly = false,
   compact = false,
 }) {
+  const themes = [
+    ...new Set([...defaultThemes, ...stories.map((story) => story.theme)]),
+  ].filter(Boolean);
   const [category, setCategory] = useState(initialCategory);
   const [theme, setTheme] = useState("all");
   const [query, setQuery] = useState("");

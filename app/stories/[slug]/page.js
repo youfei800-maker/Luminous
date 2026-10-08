@@ -1,25 +1,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { findStory, stories } from "@/lib/stories";
+import { getPublishedStories } from "@/lib/editorial-store";
 import Icon from "@/components/icon";
 import StoryCard from "@/components/story-card";
 import SaveButton from "@/components/save-button";
 import ShareButton from "@/components/share-button";
 
-export function generateStaticParams() {
-  return stories.map((story) => ({ slug: story.slug }));
-}
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const story = findStory(slug);
+  const story = (await getPublishedStories()).find(
+    (item) => item.slug === slug,
+  );
   return story
     ? { title: story.title, description: story.excerpt }
     : { title: "ストーリーが見つかりません" };
 }
 export default async function StoryPage({ params }) {
   const { slug } = await params;
-  const story = findStory(slug);
+  const stories = await getPublishedStories();
+  const story = stories.find((item) => item.slug === slug);
   if (!story) notFound();
   const related = stories
     .filter((item) => item.slug !== story.slug)
@@ -108,9 +108,11 @@ export default async function StoryPage({ params }) {
             <SaveButton slug={story.slug} title={story.title} withLabel />
             <ShareButton title={story.title} />
           </div>
-          <p className="demo-note">
-            このプロフィールと記事本文は、サイトの体験を紹介するための架空のストーリーです。
-          </p>
+          {story.isDemo && (
+            <p className="demo-note">
+              このプロフィールと記事本文は、サイトの体験を紹介するための架空のストーリーです。
+            </p>
+          )}
         </article>
         <aside className="article-sidebar">
           <div className="profile-card">

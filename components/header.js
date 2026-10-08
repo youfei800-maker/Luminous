@@ -3,14 +3,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/icon";
-import { stories } from "@/lib/stories";
 const links = [
   { href: "/stories", label: "Stories" },
   { href: "/girls", label: "Girls" },
   { href: "/women", label: "Women" },
   { href: "/about", label: "About" },
 ];
-export default function Header() {
+export default function Header({ stories }) {
   const pathname = usePathname();
   const dialog = useRef(null);
   const [query, setQuery] = useState("");

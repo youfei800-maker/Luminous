@@ -3,7 +3,15 @@ import Image from "next/image";
 import Icon from "@/components/icon";
 import StoryGrid from "@/components/story-grid";
 import EventBanner from "@/components/event-banner";
-export default function Home() {
+import { getContent, getPublishedStories } from "@/lib/editorial-store";
+export default async function Home() {
+  const [content, stories] = await Promise.all([
+    getContent(),
+    getPublishedStories(),
+  ]);
+  const site = content.site;
+  const featured =
+    stories.find((story) => story.slug === "ten-years-apart") || stories[0];
   return (
     <main id="main-content">
       <section className="hero">
@@ -22,28 +30,22 @@ export default function Home() {
           </div>
           <div className="hero-photo-note">
             <span>STORIES THAT CONNECT US</span>
-            <Link href="/stories/ten-years-apart">
-              10年後の私に、出会いにいこう。 <Icon name="diagonal" size={18} />
+            <Link href={featured ? `/stories/${featured.slug}` : "/stories"}>
+              {featured ? featured.title : "あなたの未来のヒントを探す"}{" "}
+              <Icon name="diagonal" size={18} />
             </Link>
           </div>
         </div>
         <div className="hero-copy">
           <p className="eyebrow">A CATALOGUE OF POSSIBILITIES</p>
           <h1>
-            Bloom
+            {site.heroTitle}
             <br />
-            <em>
-              your
-              <br className="hero-line-break" /> future.
-            </em>
+            <em>{site.heroAccent}</em>
           </h1>
           <div className="hero-lead">
-            <p>「知らなかったから、選べなかった」を減らす。</p>
-            <p>
-              これから未来を選ぶ女子学生と、
-              <br />
-              選んできた女性たちの物語をつなぐメディア。
-            </p>
+            <p>{site.heroLead}</p>
+            <p className="editable-lines">{site.heroDescription}</p>
           </div>
           <Link href="/stories" className="hero-cta">
             あなたの未来のヒントを探す <Icon name="diagonal" size={18} />
@@ -80,7 +82,7 @@ export default function Home() {
             すべてのストーリー <Icon name="diagonal" size={16} />
           </Link>
         </div>
-        <StoryGrid compact />
+        <StoryGrid stories={stories} compact />
         <div className="stories-bottom">
           <p>その人だけの選択に、会いにいこう。</p>
           <Link href="/stories" className="outline-button dark">
@@ -145,20 +147,8 @@ export default function Home() {
           <span className="manifesto-script">Pass the light on.</span>
         </div>
         <div>
-          <h2>
-            人生を通して、
-            <br />
-            輝き続ける女性で
-            <br />
-            溢れた社会へ。
-          </h2>
-          <p>
-            キャリアか、家庭か。挑戦か、安定か。
-            <br />
-            どちらかを諦める前に、まだ知らない生き方に出会う。
-            <br />
-            Luminousは、女性の「今」だけでなく「人生全体」を見つめます。
-          </p>
+          <h2 className="editable-lines">{site.missionTitle}</h2>
+          <p className="editable-lines">{site.missionDescription}</p>
           <Link href="/about" className="text-link">
             Luminousについて <Icon name="diagonal" size={16} />
           </Link>

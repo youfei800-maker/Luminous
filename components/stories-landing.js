@@ -1,9 +1,11 @@
 import StoryGrid from "@/components/story-grid";
 import Icon from "@/components/icon";
-export default function StoriesLanding({
+import { getPublishedStories } from "@/lib/editorial-store";
+export default async function StoriesLanding({
   category = "all",
   savedOnly = false,
 }) {
+  const stories = await getPublishedStories();
   const copy = savedOnly
     ? {
         eyebrow: "YOUR PERSONAL COLLECTION",
@@ -59,6 +61,7 @@ export default function StoriesLanding({
       </section>
       <section className="listing-section page-width">
         <StoryGrid
+          stories={stories}
           key={category}
           initialCategory={category}
           savedOnly={savedOnly}

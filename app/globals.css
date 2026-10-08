@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+.editable-lines { white-space: pre-line; }
+
 :root {
   --cream: #fffaf7;
   --pale: #faeef1;

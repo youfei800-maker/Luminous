@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icon";
+import { getContent } from "@/lib/editorial-store";
 export const metadata = { title: "Luminousについて" };
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { site } = await getContent();
   return (
     <main id="main-content">
       <section className="about-hero page-width">
@@ -34,13 +36,7 @@ export default function AboutPage() {
       <section className="about-content page-width">
         <div className="about-vision">
           <p className="eyebrow">OUR VISION</p>
-          <h2>
-            人生を通して、
-            <br />
-            輝き続ける女性で
-            <br />
-            溢れた社会へ。
-          </h2>
+          <h2 className="editable-lines">{site.missionTitle}</h2>
           <div>
             <p>
               キャリアか、家庭か。挑戦か、安定か。どちらかを諦める前に、まだ知らない生き方に出会える場所をつくる。

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-.editable-lines { white-space: pre-line; }
+.editable-lines {
+  white-space: pre-line;
+}
 
 :root {
   --cream: #fffaf7;
@@ -2439,5 +2441,155 @@ html:has(dialog[open]) {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.managed-public {
+  padding-top: 70px;
+  padding-bottom: 100px;
+  min-height: 65vh;
+}
+.managed-page-heading {
+  max-width: 850px;
+  margin-bottom: 45px;
+}
+.managed-page-heading h1 {
+  font-size: clamp(30px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 22px 0;
+  overflow-wrap: anywhere;
+}
+.managed-page-heading > p:last-child {
+  line-height: 2;
+}
+.managed-public-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.managed-public-card {
+  background: #fffaf6;
+  border: 1px solid #e7d9d5;
+}
+.managed-public-card > div:last-child {
+  padding: 25px;
+}
+.managed-public-card h2 {
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 15px 0;
+  overflow-wrap: anywhere;
+}
+.managed-public-card p {
+  line-height: 1.9;
+}
+.managed-public-card .text-link {
+  margin-top: 20px;
+}
+.managed-card-image {
+  position: relative;
+  aspect-ratio: 1.5;
+}
+.managed-card-image img,
+.managed-detail-image img {
+  object-fit: cover;
+}
+.managed-detail-image {
+  position: relative;
+  aspect-ratio: 2;
+  margin-bottom: 55px;
+}
+.managed-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 65px;
+  align-items: start;
+}
+.managed-body {
+  font-size: 16px;
+  line-height: 2.2;
+  overflow-wrap: anywhere;
+}
+.managed-body > p {
+  margin-bottom: 25px;
+}
+.managed-body h2 {
+  font-size: 24px;
+  font-weight: 400;
+  margin: 35px 0 18px;
+}
+.managed-information {
+  padding: 30px;
+  background: #fffaf6;
+  border: 1px solid #e7d9d5;
+  min-width: 0;
+}
+.managed-information h2 {
+  font-size: 22px;
+  font-weight: 400;
+}
+.managed-information dl > div {
+  padding-block: 16px;
+  border-bottom: 1px solid #e7d9d5;
+}
+.managed-information dt {
+  font-size: 12px;
+  color: #987d80;
+  margin-bottom: 6px;
+}
+.managed-information dd {
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.managed-information .event-apply {
+  padding: 25px 0 0;
+  margin: 0;
+}
+.managed-information .solid-button {
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.managed-information small {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+}
+.managed-empty {
+  padding: 50px 25px;
+  border: 1px solid #e7d9d5;
+  text-align: center;
+  line-height: 2;
+}
+.managed-empty a {
+  margin-top: 20px;
+}
+.event-banner .text-link {
+  margin-top: 20px;
+  display: flex;
+  color: inherit;
+}
+@media (max-width: 900px) {
+  .managed-public-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .managed-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+@media (max-width: 600px) {
+  .managed-public {
+    padding-top: 40px;
+  }
+  .managed-public-grid {
+    grid-template-columns: 1fr;
+  }
+  .managed-detail-image {
+    aspect-ratio: 1.3;
+    margin-bottom: 30px;
   }
 }

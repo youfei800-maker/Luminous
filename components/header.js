@@ -8,6 +8,7 @@ const links = [
   { href: "/girls", label: "Girls" },
   { href: "/women", label: "Women" },
   { href: "/about", label: "About" },
+  { href: "/activities", label: "実績" },
 ];
 export default function Header({ stories }) {
   const pathname = usePathname();
@@ -51,9 +52,9 @@ export default function Header({ stories }) {
           ))}
         </nav>
         <div className="header-tools">
-          <Link className="event-nav" href="/events/bloom-career-day">
+          <Link className="event-nav" href="/events">
             <span className="event-dot" />
-            10.24 Event <Icon name="diagonal" size={14} />
+            Events <Icon name="diagonal" size={14} />
           </Link>
           <button
             className="icon-button"
@@ -91,11 +92,8 @@ export default function Header({ stories }) {
                 <Icon name="diagonal" />
               </Link>
             ))}
-            <Link
-              href="/events/bloom-career-day"
-              onClick={() => setMenuOpen(false)}
-            >
-              10.24 Event
+            <Link href="/events" onClick={() => setMenuOpen(false)}>
+              Events
               <Icon name="diagonal" />
             </Link>
           </nav>

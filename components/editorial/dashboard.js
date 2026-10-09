@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/icon";
+import PageManager from "@/components/editorial/page-manager";
+import ImagePicker from "@/components/editorial/image-picker";
 import { themes } from "@/lib/stories";
 
 const images = [
@@ -59,6 +61,7 @@ export default function EditorialDashboard({ initialContent, email }) {
     currentArticle(initialContent.records[0]) || blankArticle(),
   );
   const [site, setSite] = useState(initialContent.site);
+  const [pageDirty, setPageDirty] = useState(false);
   const [view, setView] = useState("articles");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -69,10 +72,13 @@ export default function EditorialDashboard({ initialContent, email }) {
   const [preview, setPreview] = useState(false);
   const record = content.records.find((item) => item.slug === selected);
   const dirty =
-    view === "settings"
-      ? JSON.stringify(site) !== JSON.stringify(content.site)
-      : JSON.stringify(draft) !==
-        JSON.stringify(currentArticle(record) || blankArticleBase);
+    pageDirty ||
+    (["event", "activity"].includes(view)
+      ? false
+      : view === "settings"
+        ? JSON.stringify(site) !== JSON.stringify(content.site)
+        : JSON.stringify(draft) !==
+          JSON.stringify(currentArticle(record) || blankArticleBase));
   useEffect(() => {
     if (!dirty) return;
     const handler = (event) => {
@@ -104,6 +110,7 @@ export default function EditorialDashboard({ initialContent, email }) {
     if (next === view || !proceed()) return;
     setDraft(currentArticle(record) || blankArticle());
     setSite(content.site);
+    setPageDirty(false);
     setView(next);
     clearMessages();
   }
@@ -248,7 +255,7 @@ export default function EditorialDashboard({ initialContent, email }) {
           <button
             className={view === "articles" ? "active" : ""}
             onClick={() => switchView("articles")}
-            disabled={busy}
+            disabled={busy || uploading}
           >
             <Icon name="bookmark" size={17} />
             ストーリー管理
@@ -256,11 +263,25 @@ export default function EditorialDashboard({ initialContent, email }) {
           <button
             className={view === "settings" ? "active" : ""}
             onClick={() => switchView("settings")}
-            disabled={busy}
+            disabled={busy || uploading}
           >
             <Icon name="star" size={17} />
             サイト設定
           </button>
+          {[
+            ["event", "イベント管理"],
+            ["activity", "活動実績管理"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              className={view === key ? "active" : ""}
+              onClick={() => switchView(key)}
+              disabled={busy || uploading}
+            >
+              <Icon name="star" size={17} />
+              {label}
+            </button>
+          ))}
           <Link href="/" target="_blank">
             公開サイトを見る
             <Icon name="diagonal" size={15} />
@@ -279,7 +300,16 @@ export default function EditorialDashboard({ initialContent, email }) {
         <header className="editorial-top">
           <div>
             <p className="eyebrow">PASS THE LIGHT ON</p>
-            <h1>{view === "articles" ? "ストーリー管理" : "サイト設定"}</h1>
+            <h1>
+              {
+                {
+                  articles: "ストーリー管理",
+                  settings: "サイト設定",
+                  event: "イベント管理",
+                  activity: "活動実績管理",
+                }[view]
+              }
+            </h1>
             <p className="editorial-subtitle">
               {view === "articles"
                 ? "ひとりひとりの光を、次の誰かへ。"
@@ -307,9 +337,24 @@ export default function EditorialDashboard({ initialContent, email }) {
             {error}
           </p>
         )}
-        {view === "settings" ? (
+        {["event", "activity"].includes(view) ? (
+          <PageManager
+            key={view}
+            kind={view}
+            content={content}
+            onContent={setContent}
+            onDirty={setPageDirty}
+            onBusy={setBusy}
+          />
+        ) : view === "settings" ? (
           <section className="editorial-settings">
             <div className="editorial-settings-preview">
+              <img
+                className="managed-hero-preview"
+                src={site.heroImage}
+                alt={site.heroImageAlt}
+                style={{ objectPosition: site.heroImagePosition }}
+              />
               <p className="eyebrow">LIVE PREVIEW</p>
               <h2>
                 {site.heroTitle}
@@ -327,7 +372,44 @@ export default function EditorialDashboard({ initialContent, email }) {
             >
               <h2>トップページのメッセージ</h2>
               <p>保存すると公開サイトのトップページに反映されます。</p>
-              <fieldset disabled={busy}>
+              <fieldset disabled={busy || uploading}>
+                <ImagePicker
+                  label="トップページ画像"
+                  value={site.heroImage}
+                  alt={site.heroImageAlt}
+                  onChange={(url) =>
+                    setSite((previous) => ({ ...previous, heroImage: url }))
+                  }
+                  onBusy={setUploading}
+                />
+                <label>
+                  トップ画像の説明
+                  <input
+                    aria-label="トップ画像の説明"
+                    maxLength={2000}
+                    value={site.heroImageAlt}
+                    onChange={(event) =>
+                      setSite({ ...site, heroImageAlt: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  トップ画像の表示位置
+                  <select
+                    aria-label="トップ画像の表示位置"
+                    value={site.heroImagePosition}
+                    onChange={(event) =>
+                      setSite({
+                        ...site,
+                        heroImagePosition: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="center">中央</option>
+                    <option value="top">上</option>
+                    <option value="bottom">下</option>
+                  </select>
+                </label>
                 {Object.entries(siteLabels).map(([name, label]) => (
                   <label key={name}>
                     {label}
@@ -359,7 +441,10 @@ export default function EditorialDashboard({ initialContent, email }) {
                   </label>
                 ))}
               </fieldset>
-              <button className="editorial-primary" disabled={busy}>
+              <button
+                className="editorial-primary"
+                disabled={busy || uploading}
+              >
                 {busy ? "保存しています…" : "サイト設定を保存"}
                 <Icon name="check" size={16} />
               </button>

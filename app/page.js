@@ -17,8 +17,9 @@ export default async function Home() {
       <section className="hero">
         <div className="hero-image">
           <Image
-            src="/images/bridge.png"
-            alt="世代を越えて対話する二人の女性"
+            src={site.heroImage}
+            alt={site.heroImageAlt}
+            style={{ objectPosition: site.heroImagePosition }}
             fill
             preload
             sizes="(max-width: 760px) 100vw, 58vw"
@@ -154,7 +155,11 @@ export default async function Home() {
           </Link>
         </div>
       </section>
-      <EventBanner />
+      <EventBanner
+        events={content.events
+          .map((record) => record.published)
+          .filter(Boolean)}
+      />
     </main>
   );
 }

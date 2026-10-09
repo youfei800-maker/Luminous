@@ -918,3 +918,119 @@
     align-items: center;
   }
 }
+
+.managed-image-picker {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+.managed-image-picker > img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.managed-image-picker label,
+.managed-fields label {
+  display: grid;
+  gap: 9px;
+  font-size: 13px;
+}
+.managed-image-picker small,
+.managed-fields small {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #947a7f;
+  overflow-wrap: anywhere;
+}
+.managed-editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+.managed-fields {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 25px 0;
+}
+.managed-fields input,
+.managed-fields textarea,
+.managed-fields select,
+.managed-image-picker input,
+.managed-image-picker select {
+  width: 100%;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #decac8;
+  border-radius: 4px;
+  background: white;
+  color: #3e292e;
+  font: inherit;
+}
+.managed-fields textarea {
+  resize: vertical;
+  line-height: 1.8;
+}
+.managed-editor .editorial-editor {
+  min-width: 0;
+}
+.managed-editor-preview {
+  margin: 25px 0;
+  overflow-wrap: anywhere;
+}
+.managed-editor-preview > img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+}
+.managed-editor-preview h2 {
+  margin: 25px 0;
+  font-size: 28px;
+  font-weight: 400;
+}
+.managed-editor-preview > p {
+  line-height: 2;
+  margin: 18px 0;
+}
+.managed-editor-preview dl div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  line-height: 2;
+}
+.managed-save-actions,
+.managed-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 0;
+  border-top: 1px solid #e7d8d4;
+}
+.managed-save-actions > span,
+.managed-delete-actions small {
+  font-size: 11px;
+  color: #947a7f;
+}
+.managed-save-actions > span {
+  margin-right: auto;
+}
+.editorial-settings-preview .managed-hero-preview {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  margin-bottom: 20px;
+}
+@media (max-width: 760px) {
+  .editorial-sidebar nav {
+    flex-wrap: wrap;
+  }
+  .managed-save-actions {
+    position: static;
+  }
+}

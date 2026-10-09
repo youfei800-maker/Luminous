@@ -24,6 +24,12 @@ export default function Footer({ site, hasDemo }) {
           <Link href="/about">
             Luminousについて <Icon name="diagonal" size={16} />
           </Link>
+          <Link href="/events">
+            イベント <Icon name="diagonal" size={16} />
+          </Link>
+          <Link href="/activities">
+            活動実績 <Icon name="diagonal" size={16} />
+          </Link>
           <Link href="/saved">
             あとで読む <Icon name="bookmark" size={15} />
           </Link>

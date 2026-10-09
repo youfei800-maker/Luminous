@@ -1,7 +1,7 @@
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createServer } from "node:net";
@@ -298,6 +298,203 @@ test("署名を改変したCookie、外部オリジンからの編集、未完�
   };
   assert.equal((await save(article, 0, "publish")).status, 400);
 });
+
+test("トップ画像は変更・保存でき、不正な外部画像を拒否する", async () => {
+  const value = await content();
+  const site = {
+    ...value.site,
+    heroImage: "/images/women.png",
+    heroImageAlt: "新しいトップ画像",
+    heroImagePosition: "top",
+  };
+  const body = { kind: "site", site, version: value.siteVersion };
+  assert.equal(
+    (await request("/api/editorial/content", { method: "PUT", body })).status,
+    200,
+  );
+  const html = await (await fetch(`${base}/`)).text();
+  assert.ok(html.includes('alt="新しいトップ画像"'));
+  assert.ok(html.includes("object-position:top"));
+  assert.equal((await content()).site.heroImage, "/images/women.png");
+  assert.equal(
+    (
+      await request("/api/editorial/content", {
+        method: "PUT",
+        body: {
+          ...body,
+          version: value.siteVersion + 1,
+          site: { ...site, heroImage: "https://other.example.com/photo.jpg" },
+        },
+      })
+    ).status,
+    400,
+  );
+});
+for (const kind of ["event", "activity"]) {
+  test(`${kind}: 下書き・公開・編集・競合・再起動・非公開・削除が一覧と詳細に反映される`, async () => {
+    const key = kind === "event" ? "events" : "activities";
+    const page = {
+      slug: `test-${kind}`,
+      title: `${kind} テスト公開`,
+      summary: "概要を掲載する",
+      date: "2026-11-03",
+      image: "/images/team.jpg",
+      imageAlt: "活動の写真",
+      body: "活動の本文\n\n次の段落",
+      organizer: "Luminous",
+      schedule: "14:00–16:00",
+      location: "オンライン",
+      fee: "無料",
+      applicationUrl: "https://example.com/register",
+      applicationLabel: "参加を申し込む",
+      registrationStatus: "open",
+      category: "イベント開催",
+      partner: "テスト連携先",
+      outcomes: "キャリアを語り合う場をつくった。",
+    };
+    const change = (action, version, value = page, authorized = true) =>
+      request("/api/editorial/content", {
+        method: "PUT",
+        authorized,
+        body: { kind, action, page: value, version },
+      });
+    assert.equal((await change("publish", 0, page, false)).status, 401);
+    assert.equal((await change("draft", 0)).status, 200);
+    assert.equal((await fetch(`${base}/${key}/${page.slug}`)).status, 404);
+    assert.ok(
+      !(await (await fetch(`${base}/${key}`)).text()).includes(page.title),
+    );
+    assert.equal((await change("publish", 1)).status, 200);
+    assert.equal((await change("publish", 1)).status, 409);
+    assert.equal((await change("delete", 2)).status, 400);
+    assert.ok(
+      (await (await fetch(`${base}/${key}`)).text()).includes(page.title),
+    );
+    let html = await (await fetch(`${base}/${key}/${page.slug}`)).text();
+    assert.ok(html.includes(page.body.split("\n")[0]));
+    if (kind === "event")
+      assert.ok(html.includes('href="https://example.com/register"'));
+    else assert.ok(html.includes(page.outcomes));
+    const edited = { ...page, title: "編集済みのタイトル" };
+    assert.equal((await change("draft", 2, edited)).status, 200);
+    assert.ok(
+      (await (await fetch(`${base}/${key}/${page.slug}`)).text()).includes(
+        page.title,
+      ),
+    );
+    assert.equal((await change("publish", 3, edited)).status, 200);
+    await stop();
+    await start();
+    assert.equal(
+      (await content())[key].find((record) => record.slug === page.slug)
+        .published.title,
+      edited.title,
+    );
+    assert.ok(
+      (await (await fetch(`${base}/${key}/${page.slug}`)).text()).includes(
+        edited.title,
+      ),
+    );
+    assert.equal((await change("unpublish", 4, edited)).status, 200);
+    assert.equal((await fetch(`${base}/${key}/${page.slug}`)).status, 404);
+    assert.equal((await change("delete", 5, edited)).status, 200);
+    assert.ok(
+      !(await content())[key].some((record) => record.slug === page.slug),
+    );
+  });
+}
+test("申し込みURLの偽装・未入力・不正日付を拒否し、受付終了でリンクを隠す", async () => {
+  const record = (await content()).events[0];
+  const value = record.published;
+  const saveEvent = (page, version = record.version, action = "publish") =>
+    request("/api/editorial/content", {
+      method: "PUT",
+      body: { kind: "event", page, version, action },
+    });
+  for (const applicationUrl of [
+    "javascript:alert(1)",
+    "https://user:password@example.com/",
+    "http://example.com/",
+    "",
+  ])
+    assert.equal((await saveEvent({ ...value, applicationUrl })).status, 400);
+  assert.equal((await saveEvent({ ...value, date: "2026-02-30" })).status, 400);
+  assert.equal(
+    (await saveEvent({ ...value, registrationStatus: "closed" })).status,
+    200,
+  );
+  const html = await (await fetch(`${base}/events/${value.slug}`)).text();
+  assert.ok(html.includes("申し込み受付は終了しました"));
+  assert.ok(!html.includes(`href="${value.applicationUrl}"`));
+  assert.equal(
+    (
+      await saveEvent(
+        { ...value, registrationStatus: "closed" },
+        record.version + 1,
+        "unpublish",
+      )
+    ).status,
+    200,
+  );
+  assert.equal(
+    (await saveEvent(value, record.version + 2, "delete")).status,
+    200,
+  );
+  assert.equal((await content()).events.length, 0);
+  assert.ok(
+    !(await (await fetch(`${base}/`)).text()).includes("イベントの詳細を見る"),
+  );
+  await stop();
+  await start();
+  assert.equal(
+    (await content()).events.length,
+    0,
+    "削除した初期イベントを再生成しない",
+  );
+});
+test("既存の編集データを開くと画像・イベントの初期値を補完し、記事とアカウントを維持する", async () => {
+  const snapshot = await content();
+  const legacy = {
+    records: snapshot.records,
+    site: {
+      heroTitle: "以前の見出し",
+      heroAccent: snapshot.site.heroAccent,
+      heroLead: snapshot.site.heroLead,
+      heroDescription: snapshot.site.heroDescription,
+      missionTitle: snapshot.site.missionTitle,
+      missionDescription: snapshot.site.missionDescription,
+    },
+    siteVersion: snapshot.siteVersion,
+  };
+  await stop();
+  await writeFile(path.join(directory, "content.json"), JSON.stringify(legacy));
+  await start();
+  const upgraded = await content();
+  assert.deepEqual(upgraded.records, snapshot.records);
+  assert.equal(upgraded.site.heroTitle, "以前の見出し");
+  assert.equal(upgraded.site.heroImage, "/images/bridge.png");
+  assert.equal(upgraded.events[0].slug, "bloom-career-day");
+  assert.deepEqual(upgraded.activities, []);
+  assert.equal(
+    (
+      await request("/api/editorial/content", {
+        method: "PUT",
+        body: {
+          kind: "site",
+          site: upgraded.site,
+          version: upgraded.siteVersion,
+        },
+      })
+    ).status,
+    200,
+  );
+  const persisted = JSON.parse(
+    await readFile(path.join(directory, "content.json"), "utf8"),
+  );
+  assert.equal(persisted.events[0].slug, "bloom-career-day");
+  assert.equal(persisted.site.heroImage, "/images/bridge.png");
+});
+
 test("パスワード再設定で古いセッションが無効になり、ログアウトはCookieを消去する", async () => {
   const reset = spawnSync(
     process.execPath,

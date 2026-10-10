@@ -33,7 +33,11 @@ export default async function RootLayout({ children }) {
     .map((record) => record.published)
     .filter(Boolean);
   return (
-    <html lang="ja" className={editorial.variable}>
+    <html
+      data-scroll-behavior="smooth"
+      lang="ja"
+      className={editorial.variable}
+    >
       <body>
         <SavedProvider>
           <SiteChrome>

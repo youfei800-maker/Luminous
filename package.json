@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "editorial:setup": "node scripts/editorial-setup.mjs",
-    "test:editorial": "node --test tests/editorial.test.mjs"
+    "test:editorial": "node --test tests/editorial.test.mjs tests/editorial-storage.test.mjs",
+    "editorial:migrate": "node scripts/editorial-migrate.mjs",
+    "editorial:connect": "node scripts/editorial-connect.mjs"
   },
   "dependencies": {
+    "@next/env": "^16.4.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

@@ -51,7 +51,11 @@ function currentArticle(record) {
   return record?.draft || record?.published;
 }
 
-export default function EditorialDashboard({ initialContent, email }) {
+export default function EditorialDashboard({
+  initialContent,
+  email,
+  storageMode = "local",
+}) {
   const router = useRouter();
   const [content, setContent] = useState(initialContent);
   const [selected, setSelected] = useState(
@@ -192,8 +196,8 @@ export default function EditorialDashboard({ initialContent, email }) {
   async function upload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("画像は5MB以内で選択してください。");
+    if (file.size > 4 * 1024 * 1024) {
+      setError("画像は4MB以内で選択してください。");
       event.target.value = "";
       return;
     }
@@ -326,6 +330,11 @@ export default function EditorialDashboard({ initialContent, email }) {
             </button>
           )}
         </header>
+        <p className="editorial-storage-note">
+          {storageMode === "supabase"
+            ? "Supabaseに保存します。同じSupabaseプロジェクトに接続した公開サイトに反映されます。"
+            : "この編集画面はMac内に保存します。公開サイトには自動で反映されません。"}
+        </p>
         {notice && (
           <p className="editorial-notice" role="status">
             <Icon name="check" size={17} />
@@ -791,7 +800,7 @@ export default function EditorialDashboard({ initialContent, email }) {
                               accept="image/jpeg,image/png,image/webp"
                               onChange={upload}
                             />
-                            <small>JPEG・PNG・WebP / 5MB以内</small>
+                            <small>JPEG・PNG・WebP / 4MB以内</small>
                           </label>
                           <label>
                             画像の説明（読み上げ用）

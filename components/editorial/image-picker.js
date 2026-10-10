@@ -21,8 +21,8 @@ export default function ImagePicker({
   async function upload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("5MB以内の画像を選択してください。");
+    if (file.size > 4 * 1024 * 1024) {
+      setError("4MB以内の画像を選択してください。");
       event.target.value = "";
       return;
     }
@@ -78,7 +78,7 @@ export default function ImagePicker({
           disabled={disabled || busy}
         />
         <small>
-          JPEG・PNG・WebP / 5MB以下。アップロード後に保存してください。
+          JPEG・PNG・WebP / 4MB以下。アップロード後に保存してください。
         </small>
       </label>
       {busy && <p role="status">画像をアップロードしています…</p>}

@@ -1034,3 +1034,14 @@
     position: static;
   }
 }
+
+.editorial-storage-note {
+  padding: 13px 18px;
+  margin-bottom: 22px;
+  border: 1px solid #e7d8d4;
+  border-radius: 4px;
+  background: #fffaf6;
+  color: #73555d;
+  font-size: 12px;
+  line-height: 1.8;
+}

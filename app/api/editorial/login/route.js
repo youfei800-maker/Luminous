@@ -42,7 +42,9 @@ export async function POST(request) {
     response.cookies.set(sessionCookie, result.token, {
       httpOnly: true,
       sameSite: "strict",
-      secure: new URL(request.url).protocol === "https:",
+      secure:
+        process.env.VERCEL === "1" ||
+        new URL(request.url).protocol === "https:",
       path: "/",
       maxAge: sessionLifetime,
     });

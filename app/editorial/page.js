@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/editorial-auth";
 import { getContent } from "@/lib/editorial-store";
+import { storageMode } from "@/lib/editorial-storage.mjs";
 import EditorialDashboard from "@/components/editorial/dashboard";
 export const metadata = {
   title: "編集部管理画面",
@@ -13,6 +14,7 @@ export default async function EditorialPage() {
     <EditorialDashboard
       initialContent={await getContent()}
       email={session.email}
+      storageMode={storageMode()}
     />
   );
 }

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/icon";
-export default function EditorialLogin({ configured }) {
+export default function EditorialLogin({ configured, storageMode = "local" }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -48,10 +48,30 @@ export default function EditorialLogin({ configured }) {
         </p>
         {!configured && (
           <div className="editorial-setup-note">
-            <strong>最初に編集者アカウントを設定してください。</strong>
-            <p>サイトを起動しているターミナルで、次のコマンドを実行します。</p>
-            <code>npm run editorial:setup</code>
-            <p>設定後、このページを再読み込みしてください。</p>
+            {storageMode === "unconfigured" ? (
+              <>
+                <strong>公開サイトの保存先を設定してください。</strong>
+                <p>
+                  VercelにSupabaseのプロジェクトURLとサーバー用APIキーを設定し、再デプロイしてください。その後、Macの編集データを移行します。
+                </p>
+              </>
+            ) : storageMode === "supabase" ? (
+              <>
+                <strong>Supabaseに編集者アカウントを用意してください。</strong>
+                <p>
+                  同じSupabaseの接続設定をしたMacで、保存済みデータを移行するか、編集者アカウントを新規設定します。
+                </p>
+                <code>npm run editorial:migrate</code>
+                <p>設定後、このページを再読み込みしてください。</p>
+              </>
+            ) : (
+              <>
+                <strong>最初に編集者アカウントを設定してください。</strong>
+                <p>開発サーバーをControl＋Cで停止し、次を実行します。</p>
+                <code>npm run editorial:setup</code>
+                <p>その後 npm run dev で再起動してください。</p>
+              </>
+            )}
           </div>
         )}
         <form onSubmit={submit}>
@@ -99,7 +119,7 @@ export default function EditorialLogin({ configured }) {
         {help && (
           <div className="editorial-setup-note">
             <p>
-              サイトを管理している方が、ターミナルで次のコマンドを実行して再設定できます。
+              サイトを管理している方が、開発サーバーを停止してから次のコマンドで再設定できます。Supabaseを使う場合は、同じ保存先の接続設定が必要です。
             </p>
             <code>npm run editorial:setup -- --reset</code>
             <p>再設定すると、既存のログインセッションは無効になります。</p>

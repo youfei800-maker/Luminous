@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import sharp from "sharp";
-import { dataDirectory } from "@/lib/editorial-account.mjs";
+import { writeMedia } from "@/lib/editorial-storage.mjs";
 import {
   getSession,
   assertSameOrigin,
@@ -24,9 +22,9 @@ export async function POST(request) {
       },
     ).formData();
     const file = form.get("file");
-    if (!(file instanceof File) || file.size > 5 * 1024 * 1024)
+    if (!(file instanceof File) || file.size > 4 * 1024 * 1024)
       return NextResponse.json(
-        { error: "5MB以内のJPEG・PNG・WebPを選択してください。" },
+        { error: "4MB以内のJPEG・PNG・WebPを選択してください。" },
         { status: 400 },
       );
     const bytes = Buffer.from(await file.arrayBuffer());
@@ -60,13 +58,7 @@ export async function POST(request) {
       .webp({ quality: 85 })
       .toBuffer();
     const name = `${randomUUID()}.webp`;
-    await mkdir(path.join(dataDirectory(), "uploads"), {
-      recursive: true,
-      mode: 0o700,
-    });
-    await writeFile(path.join(dataDirectory(), "uploads", name), processed, {
-      mode: 0o600,
-    });
+    await writeMedia(name, processed);
     return NextResponse.json({ url: `/media/${name}` });
   } catch (error) {
     return NextResponse.json(

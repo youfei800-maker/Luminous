@@ -1,12 +1,11 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { dataDirectory } from "@/lib/editorial-account.mjs";
+import { readMedia } from "@/lib/editorial-storage.mjs";
 export async function GET(_request, { params }) {
   const { name } = await params;
   if (!/^[a-f0-9-]+\.(jpg|png|webp)$/.test(name))
     return new Response(null, { status: 404 });
   try {
-    const bytes = await readFile(path.join(dataDirectory(), "uploads", name));
+    const bytes = await readMedia(name);
+    if (!bytes) return new Response(null, { status: 404 });
     const types = { jpg: "image/jpeg", png: "image/png", webp: "image/webp" };
     return new Response(bytes, {
       headers: {
